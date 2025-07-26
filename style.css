@@ -80,10 +80,16 @@ h1 {
 .background-controls input[type="color"] {
     width: 50px;
     height: 40px;
-    border: none;
+    border: 2px solid #ccc;
     border-radius: 6px;
     cursor: pointer;
-    transition: opacity 0.3s ease;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.background-controls input[type="color"]:hover {
+    border-color: #999;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
 }
 
 .background-controls input[type="color"]:disabled {
