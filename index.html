@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知识卡片生成器</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>知识卡片生成器</h1>
+        
+        <div class="main-content">
+            <!-- 左侧控制面板 -->
+            <div class="control-panel">
+                <div class="form-group">
+                    <label for="title">标题</label>
+                    <input type="text" id="title" placeholder="输入卡片标题">
+                </div>
+                
+                <div class="form-group">
+                    <label for="content">正文</label>
+                    <textarea id="content" placeholder="输入卡片正文内容"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="slogan">标语</label>
+                    <input type="text" id="slogan" placeholder="输入标语">
+                </div>
+                
+                <div class="form-group">
+                    <label for="qrcode">二维码</label>
+                    <input type="file" id="qrcode" accept="image/*">
+                    <div class="qr-preview" id="qrPreview">
+                        <div class="upload-hint">支持裁剪二维码区域</div>
+                    </div>
+                    <div class="qr-options" id="qrOptions" style="display: none;">
+                        <button type="button" id="manualCropBtn">裁剪二维码</button>
+                        <button type="button" id="useOriginalBtn">使用原图</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>背景设置</label>
+                    <div class="background-controls">
+                        <input type="color" id="bgColor" value="#ffffff" title="背景颜色">
+                        <input type="file" id="bgImage" accept="image/*" title="背景图片">
+                        <button id="clearBg">清除背景</button>
+                    </div>
+                    <div class="slider-control">
+                        <label for="bgOpacity">背景透明度</label>
+                        <input type="range" id="bgOpacity" min="0" max="100" value="90">
+                        <span id="bgOpacityValue">90%</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>文字样式</label>
+                    <div class="text-controls">
+                        <div class="control-row">
+                            <label>标题</label>
+                            <input type="color" id="titleColor" value="#333333" title="标题颜色">
+                            <select id="titleFont">
+                                <option value="inherit">默认字体</option>
+                                <option value="serif">宋体</option>
+                                <option value="monospace">等宽</option>
+                                <option value="'Georgia', serif">Georgia</option>
+                                <option value="'Arial', sans-serif">Arial</option>
+                            </select>
+                            <input type="range" id="titleSize" min="16" max="48" value="28" title="标题大小">
+                        </div>
+                        <div class="control-row">
+                            <label>正文</label>
+                            <input type="color" id="contentColor" value="#555555" title="正文颜色">
+                            <select id="contentFont">
+                                <option value="inherit">默认字体</option>
+                                <option value="serif">宋体</option>
+                                <option value="monospace">等宽</option>
+                                <option value="'Georgia', serif">Georgia</option>
+                                <option value="'Arial', sans-serif">Arial</option>
+                            </select>
+                            <input type="range" id="contentSize" min="12" max="24" value="16" title="正文大小">
+                        </div>
+                        <div class="control-row">
+                            <label>标语</label>
+                            <input type="color" id="sloganColor" value="#777777" title="标语颜色">
+                            <select id="sloganFont">
+                                <option value="inherit">默认字体</option>
+                                <option value="serif">宋体</option>
+                                <option value="monospace">等宽</option>
+                                <option value="'Georgia', serif">Georgia</option>
+                                <option value="'Arial', sans-serif">Arial</option>
+                            </select>
+                            <input type="range" id="sloganSize" min="10" max="20" value="14" title="标语大小">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="copyBtn">复制卡片</button>
+                    <button id="exportBtn">导出卡片</button>
+                </div>
+            </div>
+            
+            <!-- 右侧卡片预览 -->
+            <div class="preview-area">
+                <div class="card" id="card">
+                    <div class="card-content">
+                        <h2 class="card-title draggable-text" id="previewTitle" data-type="title">卡片标题</h2>
+                        <p class="card-text draggable-text" id="previewContent" data-type="content">这里是卡片的正文内容，支持多行文字显示。</p>
+                        <div class="card-footer">
+                            <div class="card-slogan draggable-text" id="previewSlogan" data-type="slogan">标语文字</div>
+                            <div class="card-qr" id="previewQr"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="drag-tip">💡 提示：可直接拖拽调整文字位置</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 裁剪模态框 -->
+    <div class="modal" id="cropModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>裁剪二维码</h3>
+                <span class="close" id="closeCrop">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="crop-container">
+                    <img id="cropImage" style="max-width: 100%;">
+                </div>
+                <div class="crop-actions">
+                    <button id="confirmCrop">确认裁剪</button>
+                    <button id="cancelCrop">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.1/dist/cropper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
